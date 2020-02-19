@@ -37,12 +37,15 @@ contract Renting is WhitelistedRole {
     /**
      * @dev 工位状态包括暂停状态（不能租）；自由状态（可以租）；被使用状态（已被占用，不能租）
      * @dev 存在某个时刻，工位其实租用已经结束（本应该为Free状态），但是此时status仍是OnWork，需根据时间判断
+     * @dev 管理员只有在工位无人使用的时候设置为暂停状态。
      */
     enum Status {
         Stop,
         Free,
         OnWork
     }
+
+    // admin
 
     /**
      * @dev 管理员注册工位，注册工位即可出租
@@ -63,15 +66,31 @@ contract Renting is WhitelistedRole {
     }
 
     /**
-     * @param id the Place id
-     * @param secondsToRent the time of rental in seconds
-     * @param begin the start time of rental
+     * @dev 管理员移除工位
      */
-    function rent(uint256 id, uint256 secondsToRent, uint256 begin) external payable {
+    function rmPlace(uint256 _id) public onlySuperAdmin {
+        require(isPlaceExist(_id), "the Place id doesn't exist");
+        
 
     }
 
+    /**
+     * @param _id the Place id
+     * @param _secondsToRent the time of rental in seconds
+     * @param _begin the start time of rental
+     */
+    function rent(uint256 _id, uint256 _secondsToRent, uint256 _begin) external payable {
 
+    }
+
+    /**
+     * @dev 流程上是租户到期自动终止合同，不用调用合约。但是合约的一些状态此时需要更新，因此任何人都可以调用。
+     */
+    function upgradePlaceStatus(uint256 _id) public {
+        require(isPlaceExist(_id), "the Place id doesn't exist");
+        require(places[_id].status == Status.OnWork, "the Place doesn't on rent before");
+        require(condition);
+    }
 
     /**
      * @param id the Place id
