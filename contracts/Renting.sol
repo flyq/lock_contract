@@ -10,78 +10,105 @@ contract Renting is WhitelistedRole {
 
     // created after the rent-function was executed
     event LogRented(
-        bytes32 indexed fixFilter,
-        bytes32 indexed id,
-        address controller,
-        uint64 rentedFrom,
-        uint64 rentedUntil,
-        bool noReturn,
-        uint128 amount,
-        address token,
-        uint128 properties
+        uint256 indexed id,
+        address indexed user,
+        uint256 rentedFrom,         // 开始时间
+        uint256 rentedUntil,        // 结束时间
+        uint256 indexed totalPrice, // 总价
     );
 
-    // whenever the device was returned.
-    event LogReturned(
-        bytes32 indexed fixFilter,
-        bytes32 indexed id,
-        address controller,
-        uint64 rentedFrom,
-        uint64 rentedUntil,
-        uint128 paidBack
-    );
+    event LogNewPlace(uint256 indexed id, uint256 indexed perPrice);
 
     /**
-     * @param id the deviceid
-     * @param secondsToRent the time of rental in seconds
-     * @param token the address of the token to pay (See token-addreesses for details)
-     * @dev rents a device, which means it will change the state by setting the sender as controller.
+     * @dev 工位数据结构
      */
-    function rent(bytes32 id, uint32 secondsToRent, address token) external payable;
+    struct Place {
+        uint256 id;         // 工位id；
+        Status status;      // 工位状态；
+        address user;       // 工位租用者，若是UnInit，Free，则为0x0地址
+        uint256 begin;      // 这轮次租用的开始时间，Unix时间戳，若是UnInit，Free，则为0
+        uint256 end;        // 这轮此租用的结束时间，Unix时间戳，若是UnInit，Free，则为0
+        uint256 perPrice;   // 租用单价，perPrice Wei/h。有工位 Id，就会有单价，即初始化时就设置好，后续可以调整。
+    }
+
+    mapping (uint256=>Place) places;
+    uint256[] ids;
 
     /**
-     * @param id the deviceid
-     * @dev returns the Object or Device and also the funds are returned in case he returns it earlier than rentedUntil.
+     * @dev 工位状态包括暂停状态（不能租）；自由状态（可以租）；被使用状态（已被占用，不能租）
+     * @dev 存在某个时刻，工位其实租用已经结束（本应该为Free状态），但是此时status仍是OnWork，需根据时间判断
      */
-    function returnObject(bytes32 id) external;
+    enum Status {
+        Stop,
+        Free,
+        OnWork
+    }
 
     /**
-     * @param id the deviceid
-     * @param user the user because prices may depend on the user (whitelisted or discount)
+     * @dev 管理员注册工位，注册工位即可出租
+     */
+    function addPlace(uint256 _id, uint256 _perPrice) public onlySuperAdmin {
+        require(!isPlaceExist(_id), "the Place id already exist");
+        places[_id] = Place({
+            id: _id,
+            status: Status.Free,
+            user: address(0),
+            begin: 0,
+            end: 0,
+            perPrice: _perPrice
+        });
+        ids.push(_id);
+
+        emit LogNewPlace(_id, _perPrice);
+    }
+
+    /**
+     * @param id the Place id
      * @param secondsToRent the time of rental in seconds
-     * @param token the address of the token to pay (See token-addreesses for details)
+     * @param begin the start time of rental
+     */
+    function rent(uint256 id, uint256 secondsToRent, uint256 begin) external payable {
+
+    }
+
+
+
+    /**
+     * @param id the Place id
      * @return price to be payed for renting the device
-     * @dev the price for rentinng the device
+     * @dev the total price for rentinng the Place
      */
-    function price(bytes32 id, address user, uint32 secondsToRent, address token) public constant returns (uint128);
+    function price(uint256 id, uint256 secondsToRent) public view returns (uint256) {
+
+    }
 
 
-    /// a list of supported tokens for the given device
-    /// @param id the deviceid
-    /// @return array with supported tokens
-    function supportedTokens(bytes32 id) public constant returns (address[] memory addresses);
 
-    /// the receiver of the token, which may be different than the owner or even a Bitcoin-address. For fiat this may be hash of payment-data.
-    /// @param id the deviceid
-    /// @param token the paid token
-    /// @return tokenRecevier in bytes32
-    function tokenReceiver(bytes32 id, address token) public constant returns (bytes32);
 
-    /// returns the current renting state
-    /// @param user the user on which this may depend.
-    /// @param id the deviceid
-    /// @return rentable, free, open, controller, rentedUntil, rentedFrom and props of a device for a user
-    function getRentingState(bytes32 id, address user) public constant returns (bool rentable, bool free, bool open, address controller, uint64 rentedUntil, uint64 rentedFrom, uint128 props);
+
+    // view
 
     /// returns the current amount of renting states
     /// @param id deviceid
     /// @return amount of states of a device
-    function getStateCount(bytes32 id) external view returns (uint);
+    function getStateCount(Status status) external view returns (uint256) {
+
+    }
 
     /// returns the important informations of a state 
     /// @param id deviceid
     /// @param index stateindex
     /// @return controller, rentedFrom, rentedUntil and properties of the given index beloning to the state
-    function getState(bytes32 id, uint index) external view returns (address controller, uint64 rentedFrom, uint64 rentedUntil, uint128 properties);
+    function getPlaceInfo(uint256 id) external view returns (address controller, uint64 rentedFrom, uint64 rentedUntil, uint128 properties);
+    function getPlaceState(uint256 id) public view returns(Status) {
 
+    }
+
+    function isPlaceExist(uint256 _id) public view returns (bool) {
+        if(places[_id].id != 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
