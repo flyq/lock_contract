@@ -189,24 +189,34 @@ contract Renting is WhitelistedRole {
         }
     }
 
-    /**
-     * @param id the Place id
-     * @return price to be payed for renting the device
-     * @dev the total price for rentinng the Place
-     */
-    function price(uint256 id, uint256 secondsToRent) public view returns (uint256) {
-
+    function upgradeAllPlaceStatus() public {
+        for(uint256 i = 0; i < ids.length; i++) {
+            uint256 _id = ids[i];
+            upgradePlaceStatus
+        }
     }
-
-
-
-
 
     // view
 
-    /// returns the current amount of renting states
-    /// @param id deviceid
-    /// @return amount of states of a device
+    /**
+     * @param _id the Place id
+     * @return price to be payed for renting the device
+     * @dev the total price for rentinng the Place
+     */
+    function price(uint256 _id, uint256 _secondsToRent) public view returns (uint256) {
+        require(isPlaceExist(_id), "the Place id doesn't exist");
+        uint256 _price = places[_id].perPrice.mul(_secondsToRent).div(3600);
+        return _price;
+    }
+
+    /**
+     * @param id deviceid
+     * @return amount of states of a device
+     * @dev returns the current amount of renting states
+     */
+    /// 
+    /// 
+    /// 
     function getStateCount(Status status) external view returns (uint256) {
 
     }
