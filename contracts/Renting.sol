@@ -23,11 +23,19 @@ contract Renting is WhitelistedRole {
 
     event LogRmPlace(uint256 indexed id);
 
-    event LogWorkToFree(uint256 indexed id, uint256 beforeBegin, uint256 beforeEnd);
-
     event LogFreeToStop(uint256 indexed id);
 
     event LogStopToFree(uint256 indexed id);
+
+    event LogWorkToFree(uint256 indexed id, uint256 beforeBegin, uint256 beforeEnd);
+
+    event LogFreeToWork(
+        uint256 indexed id,
+        uint256 begin,
+        uint256 end,
+        uint256 indexed user,
+        uint256 indexed totalPrice
+    );
 
     /**
      * @dev 工位数据结构
@@ -128,6 +136,13 @@ contract Renting is WhitelistedRole {
         emit LogStopToFree(_id);
     }
 
+    /**
+     * @dev 管理员提取收益
+     */
+    function withdraw(uint256 amount) public onlySuperAdmin {
+        msg.sender.transfer(amount);
+    }
+
     // normal
     /**
      * @param _id the Place id
@@ -142,15 +157,14 @@ contract Renting is WhitelistedRole {
         require(msg.value >= _price, "the fee is not enough");
 
         places[_id].user = msg.sender;
+        places[_id].begin = now;
+        places[_id].end = now.add(_secondsToRent);
 
 
         uint256 _overfee = msg.value.sub(_price);
         msg.sender.transfer(_overfee);
 
-
-
-
-
+        emit LogFreeToWork(_id, now, now.add(_secondsToRent), msg.sender, _price);
     }
 
     /**
