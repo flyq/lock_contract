@@ -272,7 +272,7 @@ contract Renting is WhitelistedRole {
     }
 
     /**
-     * @dev getIdFromIndex get in from ids array
+     * @dev getIdFromIndex get id from ids array
      * @param _index the index of ids array
      * @return element of ids, that is Place's id
      */
