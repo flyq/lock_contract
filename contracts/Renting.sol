@@ -16,7 +16,7 @@ contract Renting is WhitelistedRole {
         address indexed user,
         uint256 rentedFrom,         // 开始时间
         uint256 rentedUntil,        // 结束时间
-        uint256 indexed totalPrice, // 总价
+        uint256 indexed totalPrice  // 总价
     );
 
     event LogNewPlace(uint256 indexed id, uint256 indexed perPrice);
@@ -33,7 +33,7 @@ contract Renting is WhitelistedRole {
         uint256 indexed id,
         uint256 begin,
         uint256 end,
-        uint256 indexed user,
+        address  indexed user,
         uint256 indexed totalPrice
     );
 
@@ -68,7 +68,7 @@ contract Renting is WhitelistedRole {
     /**
      * @dev 管理员注册工位，注册工位即可出租
      * @param _perPrice 租用工位的单价，每小时多少（0.0001 ETH），比如每小时1ETH，这里需要输入10000，这么做因为
-     * @param 无法输入小数，直接以 Wei 计，前端输入要有18个零左右，麻烦。
+     * @dev 无法输入小数，直接以 Wei 计，前端输入要有18个零左右，麻烦。
      */
     function addPlace(uint256 _id, uint256 _perPrice) public onlySuperAdmin {
         require(_id != 0, "the Place id shouldn't be 0"); // 因为isPlaceExist根据是否是 0 来判断是否初始化
@@ -153,7 +153,7 @@ contract Renting is WhitelistedRole {
         upgradePlaceStatus(_id);
         require(places[_id].status == Status.Free, "the Place's status is not free");
 
-        uint256 _price = places[_id].perPrice.mul(_secondsToRent).div(3600);
+        uint256 _price = getPrice(_id, _secondsToRent);
         require(msg.value >= _price, "the fee is not enough");
 
         places[_id].user = msg.sender;
@@ -192,7 +192,19 @@ contract Renting is WhitelistedRole {
     function upgradeAllPlaceStatus() public {
         for(uint256 i = 0; i < ids.length; i++) {
             uint256 _id = ids[i];
-            upgradePlaceStatus
+            upgradePlaceStatus(_id);
+        }
+    }
+
+    /**
+     * @dev upgrade [_a, _b] status
+     */
+    function upgradeAllPlaceStatus2(uint256 _a, uint256 _b) public {
+        require(_a < _b, "error order");
+        require(_b < ids.length, "should smaller than ids.length");
+        for(uint256 i = _a; i <= _b; i++) {
+            uint256 _id = ids[i];
+            upgradePlaceStatus(_id);
         }
     }
 
@@ -203,31 +215,87 @@ contract Renting is WhitelistedRole {
      * @return price to be payed for renting the device
      * @dev the total price for rentinng the Place
      */
-    function price(uint256 _id, uint256 _secondsToRent) public view returns (uint256) {
+    function getPrice(uint256 _id, uint256 _secondsToRent) public view returns (uint256) {
         require(isPlaceExist(_id), "the Place id doesn't exist");
         uint256 _price = places[_id].perPrice.mul(_secondsToRent).div(3600);
         return _price;
     }
 
     /**
-     * @param id deviceid
+     * @param _status deviceid
      * @return amount of states of a device
-     * @dev returns the current amount of renting states
+     * @dev returns the current amount of states
+     * @dev call upgradeAllPlaceStatus() before call this function, or the amount is not accurate;
      */
-    /// 
-    /// 
-    /// 
-    function getStateCount(Status status) external view returns (uint256) {
-
+    function getStateCount(Status _status) external view returns (uint256) {
+        uint256 _amount = 0;
+        for(uint256 i = 0; i < ids.length; i++) {
+            uint256 _id = ids[i];
+            if (places[_id].status == _status) {
+                _amount++;
+            }
+        }
+        return _amount;
     }
 
-    /// returns the important informations of a state 
-    /// @param id deviceid
-    /// @param index stateindex
-    /// @return controller, rentedFrom, rentedUntil and properties of the given index beloning to the state
-    function getPlaceInfo(uint256 id) external view returns (address controller, uint64 rentedFrom, uint64 rentedUntil, uint128 properties);
-    function getPlaceState(uint256 id) public view returns(Status) {
+    /**
+     * @dev get the total amount of Places
+     */
+    function getTotalAmount() external view returns (uint256) {
+        return ids.length;
+    }
 
+    /**
+     * @return element of ids;
+     */
+    function getIdFromIndex(uint256 _index) external view returns (uint256) {
+        require(_index < ids.length, "error _index");
+        return ids[_index];
+    }
+
+    /**
+     * @param _id Place id
+     * @return controller, rentedFrom, rentedUntil and properties of the given index beloning to the state
+     * @dev returns the important informations of a state
+     */
+    function getPlaceInfo(uint256 _id) external view returns (Status _status, address _user, uint256 _begin, uint256 _end, uint256 _perPrice) {
+        require(isPlaceExist(_id), "the place _id is not exists");
+
+        _status = places[_id].status;
+        _user = places[_id].user;
+        _begin = places[_id].begin;
+        _end = places[_id].end;
+        _perPrice = places[_id].perPrice;
+    }
+
+    function getPlaceState(uint256 _id) public view returns(Status) {
+        require(isPlaceExist(_id), "the place _id is not exists");
+
+        return places[_id].status;
+    }
+
+    function getPlaceUser(uint256 _id) public view returns(address) {
+        require(isPlaceExist(_id), "the place _id is not exists");
+
+        return places[_id].user;
+    }
+
+    function getPlaceBegin(uint256 _id) public view returns(uint256) {
+        require(isPlaceExist(_id), "the place _id is not exists");
+
+        return places[_id].begin;
+    }
+
+    function getPlaceEnd(uint256 _id) public view returns(uint256) {
+        require(isPlaceExist(_id), "the place _id is not exists");
+
+        return places[_id].end;
+    }
+
+    function getPlacePerPrice(uint256 _id) public view returns(uint256) {
+        require(isPlaceExist(_id), "the place _id is not exists");
+
+        return places[_id].perPrice;
     }
 
     function isPlaceExist(uint256 _id) public view returns (bool) {
