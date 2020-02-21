@@ -2,7 +2,13 @@
 
 ## how to compile
 ```shell
-truffle compile
+$ truffle version
+Truffle v5.0.37 (core: 5.0.37)
+Solidity - 0.4.24 (solc-js)
+Node v10.13.0
+Web3.js v1.2.1
+
+$ truffle compile
 ```
 
 ## api
