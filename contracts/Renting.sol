@@ -171,6 +171,7 @@ contract Renting is WhitelistedRole {
         uint256 _price = getPrice(_id, _secondsToRent);
         require(msg.value >= _price, "the fee is not enough");
 
+        places[_id].status = Status.OnWork;
         places[_id].user = msg.sender;
         places[_id].begin = now;
         places[_id].end = now.add(_secondsToRent);

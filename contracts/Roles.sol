@@ -50,7 +50,7 @@ contract SuperAdminRole {
     event SuperAdminRemoved(address indexed account);
 
     Roles.Role private _SuperAdmins;
-    uint256 private _superAdminAmount;
+    address[] public superAdminAddress;
 
     constructor () public {
         _addSuperAdmin(msg.sender);
@@ -66,7 +66,7 @@ contract SuperAdminRole {
     }
 
     function superAdminAmount() public view returns (uint256) {
-        return _superAdminAmount;
+        return superAdminAddress.length;
     }
 
     function addSuperAdmin(address account) public onlySuperAdmin {
@@ -74,19 +74,30 @@ contract SuperAdminRole {
     }
 
     function renounceWhitelistAdmin() public {
-        require(_superAdminAmount > 1, "SuperAdmins should more than 0");
+        require(superAdminAmount() > 1, "SuperAdmins should more than 0");
         _removeSuperAdmin(msg.sender);
     }
 
     function _addSuperAdmin(address account) internal {
         _SuperAdmins.add(account);
-        _superAdminAmount.add(1);
+        superAdminAddress.push(account);
+
         emit SuperAdminAdded(account);
     }
 
     function _removeSuperAdmin(address account) internal {
+        require(_SuperAdmins.has(account), "Roles: account does not have role");
+
         _SuperAdmins.remove(account);
-        _superAdminAmount.sub(1);
+
+        uint256 _i = 0;
+        while (superAdminAddress[_i] != account) {
+            _i++;
+        }
+        uint256 _length = superAdminAddress.length;
+        superAdminAddress[_i] = superAdminAddress[_length-1];
+        superAdminAddress.length = superAdminAddress.length.sub(1);
+
         emit SuperAdminRemoved(account);
     }
 }
@@ -136,19 +147,17 @@ contract WhitelistedRole is SuperAdminRole {
     }
 
     function _removeWhitelisted(address account) internal {
+        require(_whitelisteds.has(account), "Roles: account does not have role");
+
         _whitelisteds.remove(account);
 
-        require(_whitelisteds.has(account), "Roles: account does not have role");
         uint256 _i = 0;
         while (whitelistedAddress[_i] != account) {
             _i++;
         }
-
-        while (_i < whitelistedAddress.length-1) {
-            whitelistedAddress[_i] = whitelistedAddress[_i+1];
-            _i++;
-        }
-        whitelistedAddress.length--;
+        uint256 _length = whitelistedAddress.length;
+        whitelistedAddress[_i] = whitelistedAddress[_length-1];
+        whitelistedAddress.length = whitelistedAddress.length.sub(1);
 
         emit WhitelistedRemoved(account);
     }
