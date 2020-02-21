@@ -246,26 +246,140 @@ User Documentation
   "methods" : {}
 }
 
-======= contracts/Roles.sol:SuperAdminRole =======
+======= ./contracts/Roles.sol:SuperAdminRole =======
 Developer Documentation
 {
-  "methods" : {},
+  "methods" : 
+  {
+    "addSuperAdmin(address)" : 
+    {
+      "details" : "addSuperAdmin add another address to super admin",
+      "params" : 
+      {
+        "account" : "the address that will be added"
+      }
+    },
+    "isSuperAdmin(address)" : 
+    {
+      "details" : "isSuperAdmin check if the account is super admin",
+      "params" : 
+      {
+        "account" : "the address that will be checked"
+      },
+      "return" : "bool, true if account is super admin."
+    },
+    "renounceWhitelistAdmin()" : 
+    {
+      "details" : "renounceWhitelistAdmin remove himself super admin"
+    },
+    "superAdminAmount()" : 
+    {
+      "details" : "superAdminAmount get the amount of super admin",
+      "return" : "the amount of super admin"
+    }
+  },
   "title" : "SuperAdminRole"
 }
 User Documentation
 {
-  "methods" : {}
+  "methods" : 
+  {
+    "addSuperAdmin(address)" : 
+    {
+      "notice" : "only super admin can execute this function"
+    },
+    "renounceWhitelistAdmin()" : 
+    {
+      "notice" : "only super admin can execute this functionthis function can be executed only when superAdminAmount bigger than 1"
+    }
+  }
 }
 
-======= contracts/Roles.sol:WhitelistedRole =======
+======= ./contracts/Roles.sol:WhitelistedRole =======
 Developer Documentation
 {
-  "methods" : {},
+  "methods" : 
+  {
+    "addSuperAdmin(address)" : 
+    {
+      "details" : "addSuperAdmin add another address to super admin",
+      "params" : 
+      {
+        "account" : "the address that will be added"
+      }
+    },
+    "addWhitelisted(address)" : 
+    {
+      "details" : "addWhitelisted add another address to white list",
+      "params" : 
+      {
+        "account" : "the address that will be added"
+      }
+    },
+    "isSuperAdmin(address)" : 
+    {
+      "details" : "isSuperAdmin check if the account is super admin",
+      "params" : 
+      {
+        "account" : "the address that will be checked"
+      },
+      "return" : "bool, true if account is super admin."
+    },
+    "isWhitelisted(address)" : 
+    {
+      "details" : "isWhitelisted check if the account is in white list",
+      "params" : 
+      {
+        "account" : "the address that will be checked"
+      },
+      "return" : "bool, return true if account is in white list"
+    },
+    "removeWhitelisted(address)" : 
+    {
+      "details" : "removeWhitelisted remove someone from white list",
+      "params" : 
+      {
+        "account" : "the address that whill be remove"
+      }
+    },
+    "renounceWhitelistAdmin()" : 
+    {
+      "details" : "renounceWhitelistAdmin remove himself super admin"
+    },
+    "superAdminAmount()" : 
+    {
+      "details" : "superAdminAmount get the amount of super admin",
+      "return" : "the amount of super admin"
+    },
+    "whitelistedAmount()" : 
+    {
+      "details" : "whitelistedAmount get the amount of white list",
+      "return" : "the amount of white list"
+    }
+  },
   "title" : "WhitelistedRole"
 }
 User Documentation
 {
-  "methods" : {}
+  "methods" : 
+  {
+    "addSuperAdmin(address)" : 
+    {
+      "notice" : "only super admin can execute this function"
+    },
+    "addWhitelisted(address)" : 
+    {
+      "notice" : "only super admin can execute this function"
+    },
+    "removeWhitelisted(address)" : 
+    {
+      "notice" : "only super admin can execute this function"
+    },
+    "renounceWhitelistAdmin()" : 
+    {
+      "notice" : "only super admin can execute this functionthis function can be executed only when superAdminAmount bigger than 1"
+    }
+  }
 }
 
 ======= contracts/SafeMath.sol:SafeMath =======
