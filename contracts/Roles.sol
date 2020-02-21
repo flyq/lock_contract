@@ -61,18 +61,37 @@ contract SuperAdminRole {
         _;
     }
 
+    /**
+     * @dev isSuperAdmin check if the account is super admin
+     * @param account the address that will be checked
+     * @return bool, true if account is super admin.
+     */
     function isSuperAdmin(address account) public view returns (bool) {
         return _SuperAdmins.has(account);
     }
 
+    /**
+     * @dev superAdminAmount get the amount of super admin
+     * @return the amount of super admin
+     */
     function superAdminAmount() public view returns (uint256) {
         return superAdminAddress.length;
     }
 
+    /**
+     * @dev addSuperAdmin add another address to super admin
+     * @param account the address that will be added
+     * @notice only super admin can execute this function
+     */
     function addSuperAdmin(address account) public onlySuperAdmin {
         _addSuperAdmin(account);
     }
 
+    /**
+     * @dev renounceWhitelistAdmin remove himself super admin
+     * @notice only super admin can execute this function
+     * @notice this function can be executed only when superAdminAmount bigger than 1
+     */
     function renounceWhitelistAdmin() public {
         require(superAdminAmount() > 1, "SuperAdmins should more than 0");
         _removeSuperAdmin(msg.sender);
@@ -123,18 +142,37 @@ contract WhitelistedRole is SuperAdminRole {
         _;
     }
 
+    /**
+     * @dev isWhitelisted check if the account is in white list
+     * @param account the address that will be checked
+     * @return bool, return true if account is in white list
+     */
     function isWhitelisted(address account) public view returns (bool) {
         return _whitelisteds.has(account);
     }
 
+    /**
+     * @dev whitelistedAmount get the amount of white list
+     * @return the amount of white list
+     */
     function whitelistedAmount() public view returns (uint256) {
         return whitelistedAddress.length;
     }
 
+    /**
+     * @dev addWhitelisted add another address to white list
+     * @param account the address that will be added
+     * @notice only super admin can execute this function
+     */
     function addWhitelisted(address account) public onlySuperAdmin {
         _addWhitelisted(account);
     }
 
+    /**
+     * @dev removeWhitelisted remove someone from white list
+     * @param account the address that whill be remove
+     * @notice only super admin can execute this function
+     */
     function removeWhitelisted(address account) public onlySuperAdmin {
         _removeWhitelisted(account);
     }
