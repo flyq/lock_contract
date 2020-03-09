@@ -202,6 +202,7 @@ contract Renting is WhitelistedRole {
             uint256 _end = places[_id].end;
             places[_id].begin = 0;
             places[_id].end = 0;
+            places[_id].user = address(0);
 
             emit LogWorkToFree(_id, _begin, _end);
         }
