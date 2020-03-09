@@ -125,7 +125,7 @@ contract Renting is WhitelistedRole {
         require(isPlaceExist(_id), "the Place id doesn't exist");
         upgradePlaceStatus(_id);
 
-        require(places[_id].status == Status.Free, "the Place is on rented");
+        require(places[_id].status == Status.Free, "the Place is on rented, or already stopped");
         places[_id].status == Status.Stop;
 
         emit LogFreeToStop(_id);
